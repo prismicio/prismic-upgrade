@@ -1,3 +1,2 @@
-export const hello = (str: string): void => {
-	console.info("Hello %s", str);
-};
+export type { UpgradeProcessOptions } from "./UpgradeProcess";
+export { createUpgradeProcess, UpgradeProcess } from "./UpgradeProcess";
