@@ -96,29 +96,28 @@ export class UpgradeProcess {
 		const output = [
 			`\n${chalk.bgCyan(` ${chalk.bold.white("Prismic")} `)} ${chalk.dim(
 				"→",
-			)} Check command successful!\n\n`,
+			)} Check command successful!\n`,
 		];
 
 		if (Object.keys(this.context.conflicts).length) {
 			output.push(
-				`Your project ${chalk.cyan(
+				`  Your project ${chalk.cyan(
 					"has conflicting slice IDs",
 				)}, see details above.`,
-				"You won't be able to upgrade yet.",
+				"  You won't be able to upgrade yet.",
 			);
 		} else {
 			output.push(
-				`Your project is ${chalk.cyan("conflict-free")}!`,
-				"You will be able to upgrade soon.",
+				`  Your project is ${chalk.cyan("conflict-free")}!`,
+				"  You will be able to upgrade soon.",
 			);
 		}
 
 		output.push(
 			"",
-			"Stay tuned for more information about the upgrade project:",
-			"",
+			"  Stay tuned for more information about the upgrade project:",
 			"  - Newsletter: https://prismic.dev/upgrade/newsletter",
-			`  - Twitter/X: https://twitter.com/prismicio`,
+			"  - Twitter/X: https://twitter.com/prismicio",
 		);
 
 		// We prefer to manually allow console logs despite the app being a CLI to catch wild/unwanted console logs better
