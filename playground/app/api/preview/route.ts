@@ -1,13 +1,13 @@
-import { NextRequest } from "next/server";
-import { draftMode } from "next/headers";
 import { redirectToPreviewURL } from "@prismicio/next";
+import { draftMode } from "next/headers";
+import { NextRequest } from "next/server";
 
 import { createClient } from "../../../prismicio";
 
-export async function GET(request: NextRequest) {
-  const client = createClient();
+export async function GET(request: NextRequest): Promise<void> {
+	const client = createClient();
 
-  draftMode().enable();
+	draftMode().enable();
 
-  await redirectToPreviewURL({ client, request });
+	await redirectToPreviewURL({ client, request });
 }
