@@ -145,7 +145,7 @@ export class UpgradeProcess {
 				)} outside of a Slice Machine project.\n\n  Run ${chalk.cyan(
 					"npx @slicemachine/init@latest",
 				)} first or make sure you're in the right directory.`,
-				{ cause: error },
+				error instanceof Error ? { cause: error } : {},
 			);
 		}
 	}
