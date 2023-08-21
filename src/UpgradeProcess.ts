@@ -141,7 +141,7 @@ export class UpgradeProcess {
 		} catch (error) {
 			throw new ExplainedError(
 				`${logSymbols.error} Cannot run ${chalk.cyan(
-					"@prismicio/upgrade",
+					"@prismicio/upgrade-from-legacy",
 				)} outside of a Slice Machine project.\n\n  Run ${chalk.cyan(
 					"npx @slicemachine/init@latest",
 				)} first or make sure you're in the right directory.`,

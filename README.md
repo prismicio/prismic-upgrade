@@ -3,14 +3,14 @@
 TODO: Go through all "TODO" comments in the project
 
 TODO: Replace all on all files (README.md, CONTRIBUTING.md, bug_report.md, package.json):
-- @prismicio/upgrade
+- @prismicio/upgrade-from-legacy
 - A tool to ease upgrade to Slice Machine
-- prismicio/prismic-upgrade
-- prismic-upgrade
+- prismicio/prismic-upgrade-from-legacy
+- prismic-upgrade-from-legacy
 
 -->
 
-# @prismicio/upgrade
+# @prismicio/upgrade-from-legacy
 
 [![npm version][npm-version-src]][npm-version-href]
 [![npm downloads][npm-downloads-src]][npm-downloads-href]
@@ -40,7 +40,7 @@ Non-breaking space: &nbsp; are here on purpose to fix emoji rendering on certain
 ## Install
 
 ```bash
-npx @prismicio/upgrade@latest
+npx @prismicio/upgrade-from-legacy@latest
 ```
 
 ## Documentation
@@ -92,21 +92,21 @@ limitations under the License.
 <!-- TODO: Replace link with a more useful one if available -->
 
 [forum-question]: https://community.prismic.io
-[repo-bug-report]: https://github.com/prismicio/prismic-upgrade/issues/new?assignees=&labels=bug&template=bug_report.md&title=
-[repo-feature-request]: https://github.com/prismicio/prismic-upgrade/issues/new?assignees=&labels=enhancement&template=feature_request.md&title=
-[repo-pull-requests]: https://github.com/prismicio/prismic-upgrade/pulls
+[repo-bug-report]: https://github.com/prismicio/prismic-upgrade-from-legacy/issues/new?assignees=&labels=bug&template=bug_report.md&title=
+[repo-feature-request]: https://github.com/prismicio/prismic-upgrade-from-legacy/issues/new?assignees=&labels=enhancement&template=feature_request.md&title=
+[repo-pull-requests]: https://github.com/prismicio/prismic-upgrade-from-legacy/pulls
 
 <!-- Badges -->
 
-[npm-version-src]: https://img.shields.io/npm/v/@prismicio/upgrade/latest.svg
-[npm-version-href]: https://npmjs.com/package/@prismicio/upgrade
-[npm-downloads-src]: https://img.shields.io/npm/dm/@prismicio/upgrade.svg
-[npm-downloads-href]: https://npmjs.com/package/@prismicio/upgrade
-[github-actions-ci-src]: https://github.com/prismicio/prismic-upgrade/workflows/ci/badge.svg
-[github-actions-ci-href]: https://github.com/prismicio/prismic-upgrade/actions?query=workflow%3Aci
-[codecov-src]: https://img.shields.io/codecov/c/github/prismicio/prismic-upgrade.svg
-[codecov-href]: https://codecov.io/gh/prismicio/prismic-upgrade
+[npm-version-src]: https://img.shields.io/npm/v/@prismicio/upgrade-from-legacy/latest.svg
+[npm-version-href]: https://npmjs.com/package/@prismicio/upgrade-from-legacy
+[npm-downloads-src]: https://img.shields.io/npm/dm/@prismicio/upgrade-from-legacy.svg
+[npm-downloads-href]: https://npmjs.com/package/@prismicio/upgrade-from-legacy
+[github-actions-ci-src]: https://github.com/prismicio/prismic-upgrade-from-legacy/workflows/ci/badge.svg
+[github-actions-ci-href]: https://github.com/prismicio/prismic-upgrade-from-legacy/actions?query=workflow%3Aci
+[codecov-src]: https://img.shields.io/codecov/c/github/prismicio/prismic-upgrade-from-legacy.svg
+[codecov-href]: https://codecov.io/gh/prismicio/prismic-upgrade-from-legacy
 [conventional-commits-src]: https://img.shields.io/badge/Conventional%20Commits-1.0.0-%23FE5196?logo=conventionalcommits&logoColor=white
 [conventional-commits-href]: https://conventionalcommits.org
-[license-src]: https://img.shields.io/npm/l/@prismicio/upgrade.svg
-[license-href]: https://npmjs.com/package/@prismicio/upgrade
+[license-src]: https://img.shields.io/npm/l/@prismicio/upgrade-from-legacy.svg
+[license-href]: https://npmjs.com/package/@prismicio/upgrade-from-legacy

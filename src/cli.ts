@@ -15,7 +15,7 @@ VERSION
   ${pkgName}@${pkgVersion}
 
 USAGE
-  $ npx @prismicio/upgrade <command>
+  $ npx @prismicio/upgrade-from-legacy <command>
 
 COMMANDS
   check          Check for conflicts on current project
