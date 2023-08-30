@@ -1,5 +1,6 @@
 import {
 	PrismicUserProfile,
+	SliceMachineConfig,
 	SliceMachineManager,
 	createSliceMachineManager,
 } from "@slicemachine/manager";
@@ -32,9 +33,9 @@ export const createUpgradeProcess = (
 };
 
 type UpgradeProcessContext = {
+	config?: SliceMachineConfig;
 	userProfile?: PrismicUserProfile;
 	repository?: {
-		domain?: string;
 		customTypes?: CustomType[];
 		sharedSlices?: SharedSlice[];
 		compositeSlices?: CompositeSlice[];
@@ -56,49 +57,28 @@ export class UpgradeProcess {
 	}
 
 	async check(): Promise<void> {
-		// We prefer to manually allow console logs despite the app being a CLI to catch wild/unwanted console logs better
-		// eslint-disable-next-line no-console
-		console.log(
-			`\n${chalk.bgBlue(` ${chalk.bold.white("Prismic")} `)} ${chalk.dim(
-				"→",
-			)} Check command started\n`,
+		this.report("Check command started");
+
+		await this.ensureSliceMachineProject();
+		await this.loginAndFetchUserData();
+		await this.fetchRepository();
+		await this.searchCompositeSlices();
+		await this.checkConflicts();
+
+		assertExists(
+			this.context.conflicts,
+			"Conflicts must be available through context to proceed",
 		);
 
-		try {
-			await this.ensureSliceMachineProject();
-			await this.loginAndFetchUserData();
-			await this.fetchRepository();
-			await this.searchSlices();
-			await this.checkConflicts();
-
-			assertExists(
-				this.context.conflicts,
-				"Conflicts must be available through context to proceed",
-			);
-
-			if (Object.keys(this.context.conflicts).length) {
-				// We prefer to manually allow console logs despite the app being a CLI to catch wild/unwanted console logs better
-				// eslint-disable-next-line no-console
-				console.log(`\n${this.formatConflicts()}`);
-			}
-		} catch (error) {
-			if (error instanceof ExplainedError) {
-				// We prefer to manually allow console logs despite the app being a CLI to catch wild/unwanted console logs better
-				// eslint-disable-next-line no-console
-				console.log(error.message);
-
-				return;
-			}
-
-			throw error;
+		if (Object.keys(this.context.conflicts).length) {
+			// We prefer to manually allow console logs despite the app being a CLI to catch wild/unwanted console logs better
+			// eslint-disable-next-line no-console
+			console.log(`\n${this.formatConflicts()}`);
 		}
 
-		const output = [
-			`\n${chalk.bgCyan(` ${chalk.bold.white("Prismic")} `)} ${chalk.dim(
-				"→",
-			)} Check command successful!\n`,
-		];
+		this.report("Check command successful!");
 
+		const output = [];
 		if (Object.keys(this.context.conflicts).length) {
 			output.push(
 				`  Your project ${chalk.cyan(
@@ -125,17 +105,55 @@ export class UpgradeProcess {
 		console.log(output.join("\n"));
 	}
 
+	async migrate(): Promise<void> {
+		this.report("Migrate command started");
+
+		await this.ensureSliceMachineProject();
+		await this.loginAndFetchUserData();
+		await this.fetchRepository();
+		await this.searchCompositeSlices();
+		await this.checkConflicts();
+
+		assertExists(
+			this.context.conflicts,
+			"Conflicts must be available through context to proceed",
+		);
+
+		if (Object.keys(this.context.conflicts).length) {
+			throw new ExplainedError(
+				`\n${
+					logSymbols.error
+				} Cannot migrate a project with conflicts.\n\n  Run ${chalk.cyan(
+					"npx @prismicio/upgrade-from-legacy check",
+				)} for more details.`,
+			);
+		}
+
+		await this.migrateCompositeSlices();
+		await this.upsertCustomTypes();
+
+		this.report("Migrate command successful!");
+	}
+
+	protected report(message: string): void {
+		// We prefer to manually allow console logs despite the app being a CLI to catch wild/unwanted console logs better
+		// eslint-disable-next-line no-console
+		console.log(
+			`\n${chalk.bgBlue(` ${chalk.bold.white("Prismic")} `)} ${chalk.dim(
+				"→",
+			)} ${message}\n`,
+		);
+	}
+
 	protected async ensureSliceMachineProject(): Promise<void> {
 		try {
-			const config = await this.manager.project.getSliceMachineConfig();
-			this.context.repository ||= {};
-			this.context.repository.domain = config.repositoryName;
+			this.context.config = await this.manager.project.getSliceMachineConfig();
 
 			// We prefer to manually allow console logs despite the app being a CLI to catch wild/unwanted console logs better
 			// eslint-disable-next-line no-console
 			console.log(
 				`${logSymbols.success} Working with repository ${chalk.cyan(
-					this.context.repository.domain,
+					this.context.config.repositoryName,
 				)}`,
 			);
 		} catch (error) {
@@ -148,6 +166,8 @@ export class UpgradeProcess {
 				error instanceof Error ? { cause: error } : {},
 			);
 		}
+
+		await this.manager.plugins.initPlugins();
 	}
 
 	protected async loginAndFetchUserData(): Promise<void> {
@@ -209,7 +229,7 @@ export class UpgradeProcess {
 		return listrRun([
 			{
 				title: `Fetching ${chalk.cyan(
-					this.context.repository?.domain,
+					this.context.config?.repositoryName,
 				)} repository...`,
 				task: async (_, parentTask) => {
 					return listr(
@@ -284,7 +304,7 @@ export class UpgradeProcess {
 		]);
 	}
 
-	protected async searchSlices(): Promise<void> {
+	protected async searchCompositeSlices(): Promise<void> {
 		return listrRun([
 			{
 				title: "Searching composite slices...",
@@ -381,5 +401,94 @@ export class UpgradeProcess {
 		}
 
 		return output.join("\n");
+	}
+
+	protected async migrateCompositeSlices(): Promise<void> {
+		return listrRun([
+			{
+				title: `Migrating ${chalk.cyan(
+					this.context.repository?.compositeSlices?.length,
+				)} composite slices...`,
+				task: async (_, task) => {
+					assertExists(
+						this.context.config,
+						"Config must be available through context to proceed",
+					);
+					assertExists(
+						this.context.repository?.compositeSlices,
+						"Repository Composite Slices (legacy) must be available through context to proceed",
+					);
+
+					// TODO: This needs to be more flexible
+					const libraryID = this.context.config.libraries?.[0] ?? "./slices";
+
+					await Promise.all(
+						this.context.repository.compositeSlices.map(
+							async (compositeSlice) => {
+								const sharedSlice =
+									SharedSlice.fromCompositeSlice(compositeSlice);
+								const { errors } = await this.manager.slices.createSlice({
+									libraryID,
+									model: sharedSlice.definition,
+								});
+
+								if (errors.length) {
+									throw errors;
+								}
+
+								compositeSlice.meta.parent.updateSliceInSliceZone(
+									{
+										type: "SharedSlice",
+									},
+									compositeSlice.meta.path,
+								);
+							},
+						),
+					);
+
+					task.title = `Migrated ${chalk.cyan(
+						this.context.repository.compositeSlices.length,
+					)} composite slices as shared slices`;
+				},
+			},
+		]);
+	}
+
+	protected async upsertCustomTypes(): Promise<void> {
+		return listrRun([
+			{
+				title: `Upserting ${chalk.cyan(
+					this.context.repository?.customTypes?.length,
+				)} custom types...`,
+				task: async (_, task) => {
+					assertExists(
+						this.context.config,
+						"Config must be available through context to proceed",
+					);
+					assertExists(
+						this.context.repository?.customTypes,
+						"Repository Custom Types must be available through context to proceed",
+					);
+
+					await Promise.all(
+						this.context.repository.customTypes.map(async (customType) => {
+							// TODO: Need to handle existing custom type perhaps(?)
+							const { errors } =
+								await this.manager.customTypes.createCustomType({
+									model: customType.definition,
+								});
+
+							if (errors.length) {
+								throw errors;
+							}
+						}),
+					);
+
+					task.title = `Upserted ${chalk.cyan(
+						this.context.repository.customTypes.length,
+					)} custom types`;
+				},
+			},
+		]);
 	}
 }

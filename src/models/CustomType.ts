@@ -1,4 +1,7 @@
-import { CustomType as CustomTypeDefinition } from "@prismicio/types-internal/lib/customtypes";
+import {
+	CustomType as CustomTypeDefinition,
+	DynamicSlice as DynamicSliceDefinition,
+} from "@prismicio/types-internal/lib/customtypes";
 
 import { CompositeSlice } from "./CompositeSlice";
 
@@ -57,4 +60,24 @@ export class CustomType {
 
 		return extractedCompositeSlices;
 	};
+
+	updateSliceInSliceZone(
+		definition: DynamicSliceDefinition,
+		path: {
+			tabID: string;
+			sliceZoneID: string;
+			sliceID: string;
+		},
+	): void {
+		const maybeSliceZone =
+			this.definition.json?.[path.tabID]?.[path.sliceZoneID];
+
+		if (maybeSliceZone.type === "Slices" && maybeSliceZone.config?.choices) {
+			maybeSliceZone.config.choices[path.sliceID] = definition;
+		} else {
+			throw new Error(
+				`Could not find slice zone at ${this.id}::${path.tabID}::${path.sliceZoneID}`,
+			);
+		}
+	}
 }

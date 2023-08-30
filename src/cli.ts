@@ -1,5 +1,7 @@
 import meow from "meow";
 
+import { ExplainedError } from "./lib/ExplainedError";
+
 import { name as pkgName, version as pkgVersion } from "../package.json";
 
 import { createUpgradeProcess } from "./UpgradeProcess";
@@ -19,6 +21,7 @@ USAGE
 
 COMMANDS
   check          Check for conflicts on current project
+  migrate        Migrate to shared slices
 
 OPTIONS
   --help, -h     Display CLI help
@@ -45,7 +48,7 @@ OPTIONS
 	},
 );
 
-if (cli.flags.help || !["check"].includes(cli.input[0])) {
+if (cli.flags.help || !["check", "migrate"].includes(cli.input[0])) {
 	cli.showHelp();
 } else if (cli.flags.version) {
 	// eslint-disable-next-line no-console
@@ -57,9 +60,25 @@ if (cli.flags.help || !["check"].includes(cli.input[0])) {
 		input: cli.input,
 	});
 
-	switch (cli.input[0]) {
-		case "check":
-			initProcess.check();
-			break;
-	}
+	(async () => {
+		try {
+			switch (cli.input[0]) {
+				case "check":
+					await initProcess.check();
+					break;
+
+				case "migrate":
+					await initProcess.migrate();
+					break;
+			}
+		} catch (error) {
+			if (error instanceof ExplainedError) {
+				// eslint-disable-next-line no-console
+				console.log(error.message);
+
+				return;
+			}
+			throw error;
+		}
+	})();
 }
