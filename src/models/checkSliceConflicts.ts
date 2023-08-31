@@ -3,7 +3,7 @@ import { SharedSlice } from "./SharedSlice";
 
 export type SliceConflicts = Record<string, (CompositeSlice | SharedSlice)[]>;
 
-export const findSliceConflicts = (
+export const checkSliceConflicts = (
 	slices: (SharedSlice | CompositeSlice)[],
 ): SliceConflicts => {
 	const ids: Record<string, SharedSlice | CompositeSlice> = {};

@@ -17,8 +17,9 @@ import { CustomType } from "./models/CustomType";
 import { SharedSlice } from "./models/SharedSlice";
 import {
 	SliceConflicts,
-	findSliceConflicts,
-} from "./models/findSliceConflicts";
+	checkSliceConflicts,
+} from "./models/checkSliceConflicts";
+import { findDuplicatedSlices } from "./models/findDuplicatedSlices";
 
 export type UpgradeProcessOptions = {
 	cwd?: string;
@@ -63,7 +64,7 @@ export class UpgradeProcess {
 		await this.loginAndFetchUserData();
 		await this.fetchRepository();
 		await this.searchCompositeSlices();
-		await this.checkConflicts();
+		await this.checkSliceConflicts();
 
 		assertExists(
 			this.context.conflicts,
@@ -112,7 +113,7 @@ export class UpgradeProcess {
 		await this.loginAndFetchUserData();
 		await this.fetchRepository();
 		await this.searchCompositeSlices();
-		await this.checkConflicts();
+		await this.checkSliceConflicts();
 
 		assertExists(
 			this.context.conflicts,
@@ -139,7 +140,7 @@ export class UpgradeProcess {
 		// We prefer to manually allow console logs despite the app being a CLI to catch wild/unwanted console logs better
 		// eslint-disable-next-line no-console
 		console.log(
-			`\n${chalk.bgBlue(` ${chalk.bold.white("Prismic")} `)} ${chalk.dim(
+			`\n${chalk.bgCyan(` ${chalk.bold.white("Prismic")} `)} ${chalk.dim(
 				"→",
 			)} ${message}\n`,
 		);
@@ -330,7 +331,7 @@ export class UpgradeProcess {
 		]);
 	}
 
-	protected async checkConflicts(): Promise<void> {
+	protected async checkSliceConflicts(): Promise<void> {
 		return listrRun([
 			{
 				title: "Checking conflicts...",
@@ -344,7 +345,7 @@ export class UpgradeProcess {
 						"Repository Composite Slices (legacy) must be available through context to proceed",
 					);
 
-					this.context.conflicts = findSliceConflicts([
+					this.context.conflicts = checkSliceConflicts([
 						...this.context.repository.sharedSlices,
 						...this.context.repository.compositeSlices,
 					]);
@@ -373,9 +374,11 @@ export class UpgradeProcess {
 		output.push(
 			`       ${chalk.dim("(shared slice)")}  ${chalk.cyan(
 				"<slice-type>",
-			)}\n    ${chalk.dim("(composite slice)")}  ${chalk.dim(
-				"<custom-type>::<tab>::<field>::",
-			)}${chalk.cyan("<slice-type>")}`,
+			)} ${chalk.dim("(maybe-suffix)")}\n    ${chalk.dim(
+				"(composite slice)",
+			)}  ${chalk.dim("<custom-type>::<tab>::<field>::")}${chalk.cyan(
+				"<slice-type>",
+			)} ${chalk.dim("(maybe-suffix)")}`,
 		);
 
 		for (const id in this.context.conflicts) {
@@ -385,18 +388,45 @@ export class UpgradeProcess {
 				`\n\n  ${logSymbols.error} ${chalk.cyan(id)} is conflicting:\n`,
 			);
 
+			const duplicatedSlices = findDuplicatedSlices(conflict);
+			const allDuplicated =
+				duplicatedSlices.length === 1 &&
+				duplicatedSlices[0].length === conflict.length;
+
 			for (const slice of conflict) {
+				const maybeIndex =
+					duplicatedSlices.findIndex((slices) => slices.includes(slice)) + 1;
+
+				const suffix = maybeIndex
+					? ` ${chalk.hsl(maybeIndex * 45, 50, 50)(`(d${maybeIndex})`)}`
+					: "";
 				if (slice instanceof SharedSlice) {
 					output.push(
-						`       ${chalk.dim("(shared slice)")}  ${chalk.cyan(slice.id)} `,
+						`       ${chalk.dim("(shared slice)")}  ${chalk.cyan(
+							slice.id,
+						)}${suffix}`,
 					);
 				} else {
 					output.push(
 						`    ${chalk.dim("(composite slice)")}  ${chalk.dim(
 							`${slice.meta.parent.id}::${slice.meta.path.tabID}::${slice.meta.path.sliceZoneID}::`,
-						)}${chalk.cyan(slice.id)}`,
+						)}${chalk.cyan(slice.id)}${suffix}`,
 					);
 				}
+			}
+
+			if (allDuplicated) {
+				output.push(`\n    ${chalk.dim("All slices are identical!")}`);
+			} else if (duplicatedSlices.length) {
+				output.push(
+					`\n    ${chalk.dim(
+						`(d${chalk.italic(
+							duplicatedSlices.length === 1
+								? "1"
+								: `1-${duplicatedSlices.length}`,
+						)}) suffixed slices are identical to slices with the same suffix`,
+					)}`,
+				);
 			}
 		}
 

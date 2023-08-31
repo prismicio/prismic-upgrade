@@ -1,7 +1,8 @@
 {
-	"__repositoryName": "inspiring-briouat-syt67g",
-	"_repositoryName": "2306-meetup-figma",
-	"repositoryName": "upgrade-no-conflict-full-legacy",
+	"___repositoryName": "inspiring-briouat-syt67g",
+	"__repositoryName": "2306-meetup-figma",
+	"repositoryName": "upgrade-optimize-full-legacy",
+	"_repositoryName": "upgrade-no-conflict-full-legacy",
 	"adapter": {
 		"resolve": "@slicemachine/adapter-next",
 		"options": {
