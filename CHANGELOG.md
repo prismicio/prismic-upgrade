@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.3](https://github.com/prismicio/prismic-upgrade-from-legacy/compare/v0.0.2...v0.0.3) (2023-08-31)
+
+
+### Features
+
+* migrate composite slices and custom types ([0977b3b](https://github.com/prismicio/prismic-upgrade-from-legacy/commit/0977b3b91f03743a97664030e2f0cd89c165a601))
+* start looking for optimizations ([3a355ac](https://github.com/prismicio/prismic-upgrade-from-legacy/commit/3a355aca762dd695c9b28787d6812d1693249abf))
+
 ### [0.0.2](https://github.com/prismicio/prismic-upgrade-from-legacy/compare/v0.0.1...v0.0.2) (2023-08-21)
 
 ### 0.0.1 (2023-08-21)
