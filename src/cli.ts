@@ -17,15 +17,17 @@ VERSION
   ${pkgName}@${pkgVersion}
 
 USAGE
+  $ npx @prismicio/upgrade-from-legacy
   $ npx @prismicio/upgrade-from-legacy <command>
 
 COMMANDS
-  check          Check for conflicts on current project
-  migrate        Migrate to shared slices
+  start (default)  Starts upgrade GUI
+  check            Check for conflicts on current project
+  migrate          Migrate to shared slices
 
 OPTIONS
-  --help, -h     Display CLI help
-  --version, -v  Display CLI version
+  --help, -h       Display CLI help
+  --version, -v    Display CLI version
 `,
 	{
 		importMeta: import.meta,
@@ -48,7 +50,10 @@ OPTIONS
 	},
 );
 
-if (cli.flags.help || !["check", "migrate"].includes(cli.input[0])) {
+if (
+	cli.flags.help ||
+	(cli.input[0] && !["start", "check", "migrate"].includes(cli.input[0]))
+) {
 	cli.showHelp();
 } else if (cli.flags.version) {
 	// eslint-disable-next-line no-console
@@ -69,6 +74,10 @@ if (cli.flags.help || !["check", "migrate"].includes(cli.input[0])) {
 
 				case "migrate":
 					await initProcess.migrate();
+					break;
+
+				default:
+					await initProcess.start();
 					break;
 			}
 		} catch (error) {

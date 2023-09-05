@@ -12,8 +12,9 @@ module.exports = {
 		"plugin:@typescript-eslint/eslint-recommended",
 		"plugin:@typescript-eslint/recommended",
 		"plugin:prettier/recommended",
+		"plugin:react-hooks/recommended",
 	],
-	plugins: ["eslint-plugin-tsdoc"],
+	plugins: ["eslint-plugin-tsdoc", "react-refresh"],
 	rules: {
 		"no-console": ["warn", { allow: ["info", "warn", "error"] }],
 		"no-debugger": "warn",
@@ -34,5 +35,9 @@ module.exports = {
 		"@typescript-eslint/no-var-requires": "off",
 		"@typescript-eslint/explicit-module-boundary-types": "error",
 		"tsdoc/syntax": "warn",
+		"react-refresh/only-export-components": [
+      "warn",
+      { allowConstantExport: true },
+    ],
 	},
 };
