@@ -26,6 +26,7 @@ import { findDuplicatedSlices } from "./models/findDuplicatedSlices";
 
 export type UpgradeProcessOptions = {
 	cwd?: string;
+	open?: boolean;
 } & Record<string, unknown>;
 
 const DEFAULT_OPTIONS: UpgradeProcessOptions = {};
@@ -143,17 +144,21 @@ export class UpgradeProcess {
 		this.report("Migrate command successful!");
 	}
 
-	async start(): Promise<void> {
-		this.report("Start command started");
+	async gui(): Promise<void> {
+		this.report("GUI command started");
 
+		await this.ensureSliceMachineProject();
+		await this.loginAndFetchUserData();
 		await this.startGUI();
 
-		assertExists(
-			this.context.gui?.port,
-			"GUI port must be available through context to proceed",
-		);
+		if (this.options.open) {
+			assertExists(
+				this.context.gui?.port,
+				"GUI port must be available through context to proceed",
+			);
 
-		await open(`http://localhost:${this.context.gui.port}`);
+			await open(`http://localhost:${this.context.gui.port}`);
+		}
 	}
 
 	protected report(message: string): void {
@@ -553,7 +558,9 @@ export class UpgradeProcess {
 
 					task.output = "Starting server...";
 
-					const app = createUpgradeExpressApp({});
+					const app = createUpgradeExpressApp({
+						sliceMachineManager: this.manager,
+					});
 
 					await new Promise<void>((resolve) => {
 						app.listen(port, () => {
@@ -568,7 +575,7 @@ export class UpgradeProcess {
 					task.output = "";
 					task.title = `GUI started! Available at ${chalk.cyan(
 						`http://localhost:${this.context.gui.port}`,
-					)} ${__APP_MODE__ === "development" ? "(proxying)" : ""}`;
+					)} ${import.meta.env.MODE === "development" ? "(proxying)" : ""}`;
 				},
 			},
 		]);

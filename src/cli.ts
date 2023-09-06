@@ -21,17 +21,25 @@ USAGE
   $ npx @prismicio/upgrade-from-legacy <command>
 
 COMMANDS
-  start (default)  Starts upgrade GUI
-  check            Check for conflicts on current project
-  migrate          Migrate to shared slices
+  gui (default)  Launch upgrade GUI
+
+  check          Check for conflicts on current project
+  migrate        Migrate to shared slices
 
 OPTIONS
-  --help, -h       Display CLI help
-  --version, -v    Display CLI version
+  --open, -o     Open GUI in browser when ready
+
+  --help, -h     Display CLI help
+  --version, -v  Display CLI version
 `,
 	{
 		importMeta: import.meta,
 		flags: {
+			open: {
+				type: "boolean",
+				shortFlag: "o",
+				default: false,
+			},
 			help: {
 				type: "boolean",
 				shortFlag: "h",
@@ -52,7 +60,7 @@ OPTIONS
 
 if (
 	cli.flags.help ||
-	(cli.input[0] && !["start", "check", "migrate"].includes(cli.input[0]))
+	(cli.input[0] && !["gui", "check", "migrate"].includes(cli.input[0]))
 ) {
 	cli.showHelp();
 } else if (cli.flags.version) {
@@ -77,7 +85,7 @@ if (
 					break;
 
 				default:
-					await initProcess.start();
+					await initProcess.gui();
 					break;
 			}
 		} catch (error) {

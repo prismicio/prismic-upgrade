@@ -1,20 +1,33 @@
 import * as path from "node:path";
 
+import {
+	SliceMachineManager,
+	createSliceMachineManagerMiddleware,
+} from "@slicemachine/manager";
 import cors from "cors";
 import express, { Express } from "express";
 import { createProxyMiddleware } from "http-proxy-middleware";
 import serveStatic from "serve-static";
 
-type CreateUpgradeExpressAppArgs = Record<string, never>;
+type CreateUpgradeExpressAppArgs = {
+	sliceMachineManager: SliceMachineManager;
+};
 
 export const createUpgradeExpressApp = (
-	_args: CreateUpgradeExpressAppArgs,
+	args: CreateUpgradeExpressAppArgs,
 ): Express => {
 	const app = express();
 
 	app.use(cors());
 
-	if (__APP_MODE__ === "development") {
+	app.use(
+		"/_manager",
+		createSliceMachineManagerMiddleware({
+			sliceMachineManager: args.sliceMachineManager,
+		}),
+	);
+
+	if (import.meta.env.MODE === "development") {
 		app.use(
 			"/",
 			createProxyMiddleware({
