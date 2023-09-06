@@ -40,7 +40,8 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest]
-        node: [16, 18, 20]
+        # https://github.com/vitejs/vite/issues/14299
+        node: [16, 18, 20.5]
 
     steps:
       - name: Set up Node
