@@ -1,5 +1,5 @@
 if (
-	__APP_MODE__ === "development" &&
+	import.meta.env.MODE === "development" &&
 	!["check", "migrate"].includes(process.argv.slice(2).pop() ?? "")
 ) {
 	// Automatically restart the process ONLY when app is in development mode.

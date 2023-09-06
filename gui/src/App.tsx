@@ -2,7 +2,7 @@ import { Alert, AlertButton, Box } from "@prismicio/editor-ui";
 
 export function App(): JSX.Element {
 	return (
-		<div className="bg-green-500">
+		<div>
 			<Box display="grid" gridTemplateColumns="repeat(5, 600px)" gap={16}>
 				<Alert
 					title="Title"

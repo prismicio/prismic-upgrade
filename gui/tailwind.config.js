@@ -1,3 +1,5 @@
+/* eslint-disable tsdoc/syntax */
+
 /**
  * @type {import("tailwindcss").Config}
  */

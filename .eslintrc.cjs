@@ -36,8 +36,8 @@ module.exports = {
 		"@typescript-eslint/explicit-module-boundary-types": "error",
 		"tsdoc/syntax": "warn",
 		"react-refresh/only-export-components": [
-      "warn",
-      { allowConstantExport: true },
-    ],
+			"warn",
+			{ allowConstantExport: true },
+		],
 	},
 };

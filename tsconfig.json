@@ -16,9 +16,14 @@
 			"dom"
 		],
 		"types": [
-			"node"
+			"node",
+			"vitest",
+			"vite/client"
 		]
 	},
+	"include": [
+		"vite.config.ts"
+	],
 	"exclude": [
 		"node_modules",
 		"dist",
