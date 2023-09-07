@@ -1,66 +1,64 @@
-import { DocumentStatusBar, Separator, Skeleton } from "@prismicio/editor-ui";
-import { useMemo } from "react";
+import { AnimatedElement, DocumentStatusBar, Tab } from "@prismicio/editor-ui";
+import { useEffect, useState } from "react";
 
+import { AppFooter } from "./components/AppFooter";
+import { AppHeader } from "./components/AppHeader";
+import { CustomTypeList } from "./components/CustomTypeList";
+import { SharedSliceList } from "./components/SharedSliceList";
+import { useRepository } from "./store/useRepository";
 import { useSliceMachineConfig } from "./store/useSliceMachineConfig";
 import { useUser } from "./store/useUser";
 
-function Header(): JSX.Element {
-	const { config } = useSliceMachineConfig();
-	const { profile } = useUser();
-
-	const apiEndpoint = useMemo(() => {
-		if (!config) {
-			return null;
-		}
-
-		return config.apiEndpoint
-			? config.apiEndpoint.replace(/^https?:\/\//i, "")
-			: `${config.repositoryName}.prismic.io`;
-	}, [config]);
-
-	return (
-		<header className="p-4 container max-w-screen-lg mx-auto flex justify-between items-center">
-			{config ? (
-				<div>
-					<h1 className="font-medium text-xl">{config.repositoryName}</h1>
-					<a
-						href={config.apiEndpoint || `https://${apiEndpoint}`}
-						className="text-gray-600 text-sm underline"
-						target="_blank"
-					>
-						{apiEndpoint}
-					</a>
-				</div>
-			) : (
-				<div className="leading-[0] opacity-40">
-					<Skeleton width={256} height={52} />
-				</div>
-			)}
-			{profile ? (
-				<h2 className="text-sm">
-					Logged in as <em>{profile.email}</em>
-				</h2>
-			) : (
-				<div className="leading-[0] opacity-40">
-					<Skeleton width={256} height={20} />
-				</div>
-			)}
-		</header>
-	);
-}
-
 export function App(): JSX.Element {
-	useSliceMachineConfig((state) => state.fetch)();
-	useUser((state) => state.fetch)();
+	const repository = useRepository();
+	const sliceMachineConfig = useSliceMachineConfig();
+	const user = useUser();
+
+	const tabs = ["Slices", "Custom Types", "Upgrade Summary"] as const;
+	const [activeTab, setActiveTab] =
+		useState<(typeof tabs)[number]>("Custom Types");
+
+	useEffect(() => {
+		repository.fetch();
+		sliceMachineConfig.fetch();
+		user.fetch();
+	}, []);
 
 	return (
 		<>
 			<DocumentStatusBar status="release" />
-			<Header />
-			<div className="px-4 container max-w-screen-lg mx-auto">
-				<Separator decorative={true} />
+			<AppHeader />
+			<div className="container space-y-4">
+				<hr className="border-stone-300" />
+				<nav className="flex gap-2">
+					{tabs.map((tab) => (
+						<Tab
+							key={tab}
+							title={tab}
+							selected={activeTab === tab}
+							onSelect={() => setActiveTab(tab)}
+						/>
+					))}
+				</nav>
+				<AnimatedElement>
+					{activeTab === "Slices" ? (
+						<main key="Slices" className="space-y-4">
+							TODO: Slices
+						</main>
+					) : activeTab === "Custom Types" ? (
+						<main key="Custom Types" className="space-y-4">
+							<CustomTypeList key="Custom Types" />
+							<SharedSliceList key="Slices" />
+						</main>
+					) : (
+						<main key="Upgrade Summary" className="space-y-4">
+							TODO: Upgrade Summary
+						</main>
+					)}
+				</AnimatedElement>
+				<hr className="border-stone-300" />
 			</div>
-			<main className="p-4"></main>
+			<AppFooter />
 		</>
 	);
 }
