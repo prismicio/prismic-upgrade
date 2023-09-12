@@ -1,0 +1,45 @@
+@import "@prismicio/editor-ui/style.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+	@apply overflow-y-scroll;
+}
+
+.container {
+	@apply px-4 max-w-screen-lg mx-auto;
+}
+
+.heading-1 {
+	@apply font-medium text-2xl;
+}
+
+.heading-2 {
+	@apply font-medium text-xl;
+}
+
+.heading-3 {
+	@apply font-medium;
+}
+
+.heading-4 {
+	@apply font-medium;
+}
+
+.heading-5 {
+	@apply font-medium;
+}
+
+.badge {
+	@apply text-xs rounded bg-stone-200/50 cursor-default inline-flex items-center gap-2 px-2 py-1 text-stone-500 not-italic;
+}
+
+.badge.badge--medium {
+	@apply py-1.5
+}
+
+.badge:hover {
+	@apply bg-stone-200;
+}

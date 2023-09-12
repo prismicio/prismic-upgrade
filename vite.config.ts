@@ -7,7 +7,16 @@ export default defineConfig({
 			entry: {
 				index: "./src/index.ts",
 				cli: "./src/cli.ts",
+				"cli-watcher": "./src/cli-watcher.ts",
 			},
+		},
+		rollupOptions: {
+			// Listing `nodemon` as external prevents it from being
+			// bundled. Note that `nodemon` is listed under
+			// devDependencies and is used in
+			// `./src/bin/start-slicemachine.ts`, which would
+			// normally prompt Vite to bundle the dependency.
+			external: ["nodemon"],
 		},
 	},
 	plugins: [
@@ -21,10 +30,12 @@ export default defineConfig({
 			reporter: ["lcovonly", "text"],
 		},
 		setupFiles: ["./test/__setup__.ts"],
-		deps: {
-			inline:
-				// TODO: Replace with true once https://github.com/vitest-dev/vitest/issues/2806 is fixed.
-				[/^(?!.*vitest).*$/],
+		server: {
+			deps: {
+				inline:
+					// TODO: Replace with true once https://github.com/vitest-dev/vitest/issues/2806 is fixed.
+					[/^(?!.*vitest).*$/],
+			},
 		},
 	},
 });

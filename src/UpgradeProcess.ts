@@ -5,11 +5,14 @@ import {
 	createSliceMachineManager,
 } from "@slicemachine/manager";
 import chalk from "chalk";
+import { Express } from "express";
+import { getPort } from "get-port-please";
 import logSymbols from "log-symbols";
 import open from "open";
 
 import { ExplainedError } from "./lib/ExplainedError";
 import { assertExists } from "./lib/assertExists";
+import { createUpgradeExpressApp } from "./lib/createUpgradeExpressApp";
 import { listr, listrRun } from "./lib/listr";
 
 import { CompositeSlice } from "./models/CompositeSlice";
@@ -23,6 +26,7 @@ import { findDuplicatedSlices } from "./models/findDuplicatedSlices";
 
 export type UpgradeProcessOptions = {
 	cwd?: string;
+	open?: boolean;
 } & Record<string, unknown>;
 
 const DEFAULT_OPTIONS: UpgradeProcessOptions = {};
@@ -34,6 +38,10 @@ export const createUpgradeProcess = (
 };
 
 type UpgradeProcessContext = {
+	gui?: {
+		app?: Express;
+		port?: number;
+	};
 	config?: SliceMachineConfig;
 	userProfile?: PrismicUserProfile;
 	repository?: {
@@ -134,6 +142,23 @@ export class UpgradeProcess {
 		await this.upsertCustomTypes();
 
 		this.report("Migrate command successful!");
+	}
+
+	async gui(): Promise<void> {
+		this.report("GUI command started");
+
+		await this.ensureSliceMachineProject();
+		await this.loginAndFetchUserData();
+		await this.startGUI();
+
+		if (this.options.open) {
+			assertExists(
+				this.context.gui?.port,
+				"GUI port must be available through context to proceed",
+			);
+
+			await open(`http://localhost:${this.context.gui.port}`);
+		}
 	}
 
 	protected report(message: string): void {
@@ -517,6 +542,40 @@ export class UpgradeProcess {
 					task.title = `Upserted ${chalk.cyan(
 						this.context.repository.customTypes.length,
 					)} custom types`;
+				},
+			},
+		]);
+	}
+
+	protected async startGUI(): Promise<void> {
+		return listrRun([
+			{
+				title: "Starting GUI...",
+				task: async (_, task) => {
+					task.output = "Finding port...";
+
+					const port = await getPort({ port: 8888 });
+
+					task.output = "Starting server...";
+
+					const app = createUpgradeExpressApp({
+						sliceMachineManager: this.manager,
+					});
+
+					await new Promise<void>((resolve) => {
+						app.listen(port, () => {
+							resolve();
+						});
+					});
+
+					this.context.gui ||= {};
+					this.context.gui.port = port;
+					this.context.gui.app = app;
+
+					task.output = "";
+					task.title = `GUI started! Available at ${chalk.cyan(
+						`http://localhost:${this.context.gui.port}`,
+					)} ${import.meta.env.MODE === "development" ? "(proxying)" : ""}`;
 				},
 			},
 		]);
